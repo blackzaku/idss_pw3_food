@@ -1,0 +1,180 @@
+<html lang="en" >
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Angular Material style sheet -->
+  <link rel="stylesheet" href="/bower_components/angular-material/angular-material.min.css">
+  <link rel="stylesheet" href="/index.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body ng-app="IdssApp" ng-cloak>
+
+  <md-content ng-controller="FrontController as front">
+    <md-tabs md-border-bottom>
+      <md-tab label="Recommendation">
+        <md-content class="md-padding">
+          <h1 class="md-display-2">Recommendation</h1>
+            <p> The recommendation should show up here, please stand still, Salva will finish this up soon, meanwhile work in the core, please </p>
+        </md-content>
+      </md-tab>
+      <md-tab label="Recipes">
+        <md-content class="md-padding">
+            <!-- Liked Recipes -->
+
+
+            <recipe-search recipe-selected="addRecipe(recipe)"></recipe-search>
+
+            <style>
+
+                .ingredients-column {
+                    padding: 10px;
+                }
+
+              md-tabs  {
+                height:100%;
+              }
+
+              .ingredients-container {
+                  position: relative;
+                  display: block;
+                  width: 100%;
+                  height: 100vh;
+                  border: solid 1px #ccc;
+                  padding: 10px;
+              }
+
+                .recipe-list {
+                    width:100%;
+                }
+
+                recipe-search {
+                    max-width: 500px;
+                }
+
+                .recipe-list > md-card {
+                    float:left;
+                    width: calc(50% - 16px);
+                }
+
+                @media all and (min-width: 1024px) {
+                    .recipe-list > md-card {
+                      width: calc(33.33% - 16px);
+                    }
+                }
+
+            </style>
+
+            <div class="recipe-list">
+                <md-card ng-repeat="recipe in recommend.selected">
+              <md-card-title>
+                <md-card-title-text>
+                  <a class="md-title recommend-title" href="{{recipe.url}}" target="_blank">{{recipe.label}}</a>
+                  <span class="md-subhead">{{recipe.source}}</span>
+                </md-card-title-text>
+                <md-card-title-media>
+                  <img class="md-media-sm card-media" ng-src="{{recipe.image}}"></img>
+                </md-card-title-media>
+              </md-card-title>
+              <md-card-actions layout="row" layout-align="end center">
+                <md-button class="md-icon-button" ng-click="setLiked(recipe,false)" ng-class="{'md-accent': recipe.liked === false}">
+                    <i class="material-icons">thumb_down</i>
+                </md-button>
+                <md-button class="md-icon-button" ng-click="setLiked(recipe, true)" ng-class="{'md-primary': recipe.liked === true}">
+                    <i class="material-icons">thumb_up</i>
+                </md-button>
+                  <md-menu>
+
+                    <md-button aria-label="Open phone interactions menu" class="md-icon-button" ng-click="openMenu($mdMenu, $event)">
+                        <i class="material-icons">menu</i>
+                    </md-button>
+
+                      <md-menu-content width="4">
+                        <md-menu-item>
+                          <md-button ng-click="removeRecipe(recipe);">
+                            <i class="material-icons">delete</i> Delete
+                          </md-button>
+                        </md-menu-item>
+                      </md-menu-content>
+
+                  </md-menu>
+              </md-card-actions>
+            </md-card>
+            </div>
+
+
+        </md-content>
+      </md-tab>
+      <md-tab label="Ingredients">
+
+          <md-content class="md-padding" layout-xs="column" layout="row">
+          <div  class="ingredient-column" flex-xs flex-gt-xs="50" layout="column">
+
+            <md-input-container>
+              <label>Ingredient</label>
+              <input type="text" ng-model="ingredientFilter">
+            </md-input-container>
+
+            <md-virtual-repeat-container class="ingredients-container" style="height: calc(100% - 176px); width: 100%;">
+              <div md-virtual-repeat="ingredient in recommend.ingredients | filter : ingredientFilter : false"
+                  class="ingredient-line" md-item-size="20" flex>
+                  <md-button class="md-icon-button"
+                             ng-class="{'md-accent': ingredient.include === '-', 'md-primary': ingredient.include === '+'}"
+                             ng-click="toggleIngredient(ingredient)">
+                    <i class="material-icons" ng-show="!ingredient.include">check_box_outline_blank</i>
+                    <i class="material-icons" ng-show="ingredient.include === '-'">indeterminate_check_box</i>
+                    <i class="material-icons" ng-show="ingredient.include === '+'">check_box</i>
+                  </md-button>
+                  {{ingredient.name}}
+              </div>
+            </md-virtual-repeat-container>
+          </div>
+
+            <div class="ingredients-column" flex-xs flex-gt-xs="50" layout="column">
+
+            <md-input-container>
+              <label>Facts and Labels</label>
+              <input type="text" ng-model="factsFilter">
+            </md-input-container>
+
+            <md-virtual-repeat-container class="ingredients-container" style="height: calc(100% - 176px); width: 100%;">
+              <div md-virtual-repeat="fact in recommend.facts | filter : factsFilter : false"
+                  class="ingredient-line" md-item-size="20" flex>
+                  <md-button class="md-icon-button"
+                             ng-class="{'md-accent': fact.include === '-', 'md-primary': fact.include === '+'}"
+                             ng-click="toggleIngredient(fact)">
+                    <i class="material-icons" ng-show="!fact.include">check_box_outline_blank</i>
+                    <i class="material-icons" ng-show="fact.include === '-'">indeterminate_check_box</i>
+                    <i class="material-icons" ng-show="fact.include === '+'">check_box</i>
+                  </md-button>
+                  {{fact.name}}
+              </div>
+            </md-virtual-repeat-container>
+            </div>
+
+        </md-content>
+      </md-tab>
+    </md-tabs>
+  </md-content>
+
+
+
+
+
+
+  <!-- Auxiliars -->
+
+
+  <!-- Angular Material requires Angular.js Libraries -->
+  <script src="/bower_components/angular/angular.min.js"></script>
+  <script src="/bower_components/angular-animate/angular-animate.min.js"></script>
+  <script src="/bower_components/angular-aria/angular-aria.min.js"></script>
+  <script src="/bower_components/angular-messages//angular-messages.min.js"></script>
+
+  <!-- Angular Material Library -->
+  <script src="/bower_components/angular-material/angular-material.min.js"></script>
+
+  <!-- App  -->
+  <script type="text/javascript" src="/index.js"></script>
+  <script type="text/javascript" src="/components/recipeSearch.js"></script>
+
+</body>
+</html>

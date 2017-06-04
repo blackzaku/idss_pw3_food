@@ -87,3 +87,14 @@ ENV/
 
 # Rope project settings
 .ropeproject
+/server/recipes.json
+/server/bower_components/
+/ingredient_dataset.txt
+/ingredients.txt
+/recipes.txt
+/ingredients_original.txt
+/additional-ingredients.txt
+/recipes.json
+/server/ingredients.json
+/server/facts.json
+/server/bower.json

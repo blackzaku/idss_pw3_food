@@ -1,0 +1,36 @@
+
+.recommend-title {
+    text-decoration: none;
+    color: #1f9e96;
+    font-size: 16px;
+}
+
+.autocomplete-custom-template li {
+  border-bottom: 1px solid #ccc;
+  height: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  white-space: normal;
+}
+.autocomplete-custom-template li:last-child {
+  border-bottom-width: 0;
+}
+.autocomplete-custom-template .item-title,
+.autocomplete-custom-template .item-metadata {
+  display: block;
+}
+
+.autocomplete-custom-template .item-title {
+    line-height: 2.0;
+}
+.autocomplete-custom-template .item-metadata {
+    line-height: 1.5;
+}
+
+.autocomplete-custom-template .item-title .icon {
+
+    height: 48px;
+    float: left;
+    width: 48px;
+    margin-right: 12px;
+}

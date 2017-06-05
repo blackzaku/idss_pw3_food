@@ -24,14 +24,20 @@ class IDSSHandler(http.server.SimpleHTTPRequestHandler):
 
     def parse_POST(self):
         cthead = self.headers['content-type']
+        print(cthead)
         if cthead is not None:
             ctype, pdict = parse_header(cthead)
             if ctype == 'multipart/form-data':
+                print(self.rfile)
                 postvars = parse_multipart(self.rfile, pdict)
             elif ctype == 'application/x-www-form-urlencoded':
                 length = int(self.headers['content-length'])
-                postvars = parse_qs(
-                    self.rfile.read(length), keep_blank_values=True)
+                data = self.rfile.read(length)
+                try:
+                    postvars = json.loads(data)
+                except ValueError:
+                    postvars = parse_qs(data, keep_blank_values=True)
+                    pass
             else:
                 postvars = {}
         else:

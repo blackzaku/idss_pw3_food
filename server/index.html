@@ -69,10 +69,9 @@
                     <md-virtual-repeat-container class="ingredients-container"
                                                  style="height: calc(100% - 176px); width: 100%;">
                         <div md-virtual-repeat="ingredient in recommend.ingredients | filter : ingredientFilter : false"
-                             class="ingredient-line" md-item-size="20" flex>
+                             class="ingredient-line" md-item-size="20" ng-click="toggleIngredient(ingredient)" flex>
                             <md-button class="md-icon-button"
-                                       ng-class="{'md-accent': ingredient.include === '-', 'md-primary': ingredient.include === '+'}"
-                                       ng-click="toggleIngredient(ingredient)">
+                                       ng-class="{'md-accent': ingredient.include === '-', 'md-primary': ingredient.include === '+'}" >
                                 <i class="material-icons" ng-show="!ingredient.include">check_box_outline_blank</i>
                                 <i class="material-icons"
                                    ng-show="ingredient.include === '-'">indeterminate_check_box</i>
@@ -87,11 +86,11 @@
 
                     <h4>Nutritional Facts</h4>
 
-                    <div ng-repeat="fact in recommend.facts"
+                    <div ng-repeat="fact in recommend.facts" ng-click="toggleIngredient(fact)"
                              class="ingredient-line" md-item-size="20" flex>
                             <md-button class="md-icon-button"
                                        ng-class="{'md-accent': fact.include === '-', 'md-primary': fact.include === '+'}"
-                                       ng-click="toggleIngredient(fact)">
+                                       >
                                 <i class="material-icons" ng-show="!fact.include">check_box_outline_blank</i>
                                 <i class="material-icons" ng-show="fact.include === '-'">indeterminate_check_box</i>
                                 <i class="material-icons" ng-show="fact.include === '+'">check_box</i>

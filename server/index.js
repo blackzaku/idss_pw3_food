@@ -14,6 +14,7 @@ app.factory("recommend", ["$http", function ($http) {
             dessert: []
         },
 
+        facts: [],
         names: [],
         _names_lower: [],
         indexed: {},
@@ -23,36 +24,50 @@ app.factory("recommend", ["$http", function ($http) {
         ingredients: []
     };
 
-    recommend.suggest = function() {
-        let data = {likes: [], dislikes: []};
+    recommend.suggest = function () {
+        let data = {
+            likes: [], dislikes: [],
+            ingredients: [], no_ingredients: [],
+            labels: [], no_labels: []
+        };
+
         for (let recipe in recommend.selected) {
-            if (recipe.liked === true) {
-                data.likes.push(recipe.label);
-            }
-            if (recipe.liked === false) {
-                data.dislikes.push(recipe.label);
-            }
+            if (recipe.liked === true) data.likes.push(recipe.label);
+            if (recipe.liked === false) data.dislikes.push(recipe.label);
         }
-             $http({
-              method: 'POST',
-              url: '/suggest',
-                 data: data
-            }).then(
-                (response) => {
-                    console.log("Suggest response got:",response);
-                    let result = response.data;
-                    // We get three lists
-                    recommend.suggestions.starter = result.starters.map((dn) => recommend.indexed[dn]);
-                    recommend.suggestions.main = result.mains.map((dn) => recommend.indexed[dn]);
-                    recommend.suggestions.dessert = result.desserts.map((dn) => recommend.indexed[dn]);
-                },
-                (error) => console.error(error));
+        for (let ingredient of recommend.ingredients) {
+            if (ingredient.include === "+") data.ingredients.push(ingredient.name);
+            if (ingredient.include === "-") data.no_ingredients.push(ingredient.name);
+        }
+        for (let label of recommend.facts) {
+            if (label.include === "+") data.labels.push(label.name);
+            if (label.include === "-") data.no_labels.push(label.name);
+        }
+
+        if (data.labels.length === 0) data.labels = null;
+        if (data.ingredients.length === 0) data.ingredients = null;
+
+
+        $http({
+            method: 'POST',
+            url: '/suggest',
+            data: data
+        }).then(
+            (response) => {
+                console.log("Suggest response got:", response);
+                let result = response.data;
+                // We get three lists
+                recommend.suggestions.starter = result.starters.map((dn) => recommend.indexed[dn]);
+                recommend.suggestions.main = result.mains.map((dn) => recommend.indexed[dn]);
+                recommend.suggestions.dessert = result.desserts.map((dn) => recommend.indexed[dn]);
+            },
+            (error) => console.error(error));
     };
 
-    recommend.random = function(course, count=10) {
+    recommend.random = function (course, count = 10) {
         let list = [];
-        for (let i = 0; i < count ; i++) {
-            list.push(recommend.recipes[Math.floor(Math.random()*recommend.recipes.length)]);
+        for (let i = 0; i < count; i++) {
+            list.push(recommend.recipes[Math.floor(Math.random() * recommend.recipes.length)]);
         }
         recommend.suggestions[course] = list;
     };
@@ -60,28 +75,28 @@ app.factory("recommend", ["$http", function ($http) {
     recommend.load = function () {
 
         $http({
-          method: 'GET',
-          url: '/facts.json'
+            method: 'GET',
+            url: '/facts.json'
         }).then(
             (response) => recommend.facts = response.data,
             (error) => console.error(error));
 
         $http({
-          method: 'GET',
-          url: '/ingredients.json'
+            method: 'GET',
+            url: '/ingredients.json'
         }).then(
             (response) => recommend.ingredients = response.data,
             (error) => console.error(error));
 
         $http({
-          method: 'GET',
-          url: '/recipes.json'
+            method: 'GET',
+            url: '/recipes.json'
         }).then(
             (response) => recommend.init(response.data),
             (error) => console.error(error));
     };
 
-    recommend.init = function(recipes) {
+    recommend.init = function (recipes) {
 
         recommend.recipes = recipes;
 
@@ -166,7 +181,7 @@ app.controller('FrontController', ["$scope", "recommend", function FrontControll
     };
 
 
-    $scope.ingredientFilter="";
+    $scope.ingredientFilter = "";
     $scope.toggleIngredient = (ingredient) => {
         "use strict";
         if (!ingredient.include) {

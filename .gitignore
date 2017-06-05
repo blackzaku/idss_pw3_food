@@ -97,7 +97,6 @@ ENV/
 /recipes.json
 /server/ingredients.json
 /server/facts.json
-/server/bower.json
 .idea/idss_pw3_food.iml
 .idea/misc.xml
 .idea/modules.xml

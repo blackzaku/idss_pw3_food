@@ -98,3 +98,8 @@ ENV/
 /server/ingredients.json
 /server/facts.json
 /server/bower.json
+.idea/idss_pw3_food.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
+food/

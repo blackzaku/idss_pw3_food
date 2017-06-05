@@ -1,7 +1,8 @@
 import json
-
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 filename = "recipes.json"
-with open(filename) as json_data:
+with open(dir_path+"/"+filename) as json_data:
     recipes = json.load(json_data)
 
 names = [label for label, recipe in recipes.items()]

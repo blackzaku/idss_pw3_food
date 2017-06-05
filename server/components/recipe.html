@@ -1,0 +1,89 @@
+<md-card>
+    <md-card-header ng-if="$ctrl.suggestion"
+        ng-class="{'starter-header': $ctrl.header === 'starter', 'main-header': $ctrl.header === 'main', 'dessert-header': $ctrl.header === 'dessert'}">
+      <md-card-avatar>
+        <img ng-src="/img/{{$ctrl.header}}.png"/>
+      </md-card-avatar>
+
+      <md-card-header-text>
+        <span class="md-title big" ng-if="$ctrl.header == 'starter'">Starter</span>
+        <span class="md-title big" ng-if="$ctrl.header == 'main'">Main Dish</span>
+        <span class="md-title big" ng-if="$ctrl.header == 'dessert'">Dessert</span>
+      </md-card-header-text>
+
+    </md-card-header>
+
+    <img ng-src="{{$ctrl.recipe.image}}" ng-if="$ctrl.suggestion" class="md-card-image" alt="Washed Out">
+      <md-card-title>
+            <md-card-title-text>
+                <a class="md-title recommend-title" href="{{$ctrl.recipe.url}}" target="_blank">{{$ctrl.recipe.label}}</a>
+                <span class="md-subhead">{{$ctrl.recipe.source}}</span>
+            </md-card-title-text>
+            <md-card-title-media ng-if="!$ctrl.suggestion">
+                <img class="md-media-sm card-media" ng-src="{{$ctrl.recipe.image}}"></img>
+            </md-card-title-media>
+        </md-card-title>
+
+
+    <md-card-content ng-if="$ctrl.suggestion">
+      <p>
+        {{$ctrl.recipe.ingredientLines.join(", ")+"."}}
+      </p>
+    </md-card-content>
+
+
+    <md-card-actions layout="row" layout-align="end center">
+
+
+        <md-button ng-if="$ctrl.suggestion && recommend.suggestions[$ctrl.header].length > 1"
+                   class="md-icon-button" ng-click="skipSuggestion($ctrl.header)">
+             <md-tooltip md-direction="left">Get an alternative</md-tooltip>
+            <i class="material-icons">shuffle</i>
+        </md-button>
+
+        <md-button class="md-icon-button" ng-click="setLiked($ctrl.recipe,false)"
+                   ng-class="{'md-accent': $ctrl.recipe.liked === false}">
+             <md-tooltip md-direction="left">Set as disliked</md-tooltip>
+            <i class="material-icons">thumb_down</i>
+        </md-button>
+
+        <md-button class="md-icon-button" ng-click="setLiked($ctrl.recipe, true)"
+                   ng-class="{'md-primary': $ctrl.recipe.liked === true}">
+             <md-tooltip md-direction="left">Set as Liked</md-tooltip>
+            <i class="material-icons">thumb_up</i>
+        </md-button>
+        <md-menu ng-if="!$ctrl.suggestion">
+
+            <md-button aria-label="Open phone interactions menu" class="md-icon-button"
+                       ng-click="openMenu($mdMenu, $event)">
+                <i class="material-icons">menu</i>
+            </md-button>
+
+            <md-menu-content width="4">
+                <md-menu-item>
+                    <md-button ng-click="removeRecipe($ctrl.recipe)">
+                        <i class="material-icons">delete</i> Delete
+                    </md-button>
+                </md-menu-item>
+                <md-menu-item>
+                    <md-button ng-click="setAs($ctrl.recipe, 'starter')">
+                        Set as Starter
+                    </md-button>
+                </md-menu-item>
+                <md-menu-item>
+                    <md-button ng-click="removeRecipe($ctrl.recipe, 'main')">
+                        Set as Main Dish
+                    </md-button>
+                </md-menu-item>
+                <md-menu-item>
+                    <md-button ng-click="removeRecipe($ctrl.recipe, 'dessert')">
+                        Set as Dessert
+                    </md-button>
+                </md-menu-item>
+            </md-menu-content>
+
+        </md-menu>
+    </md-card-actions>
+
+
+</md-card>

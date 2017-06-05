@@ -4,9 +4,16 @@ app = angular.module('IdssApp', ['ngMaterial']);
 app.factory("recommend", ["$http", function ($http) {
     "use strict";
 
+    $http.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 
 
     let recommend = {
+        suggestions: {
+            starter: [],
+            main: [],
+            dessert: []
+        },
+
         names: [],
         _names_lower: [],
         indexed: {},
@@ -14,6 +21,40 @@ app.factory("recommend", ["$http", function ($http) {
         selected: [],
         recipes: [],
         ingredients: []
+    };
+
+    recommend.suggest = function() {
+        let data = {likes: [], dislikes: []};
+        for (let recipe in recommend.selected) {
+            if (recipe.liked === true) {
+                data.likes.push(recipe.label);
+            }
+            if (recipe.liked === false) {
+                data.dislikes.push(recipe.label);
+            }
+        }
+             $http({
+              method: 'POST',
+              url: '/suggest',
+                 data: data
+            }).then(
+                (response) => {
+                    console.log("Suggest response got:",response);
+                    let result = response.data;
+                    // We get three lists
+                    recommend.suggestions.starter = result.starters.map((dn) => recommend.indexed[dn]);
+                    recommend.suggestions.main = result.mains.map((dn) => recommend.indexed[dn]);
+                    recommend.suggestions.dessert = result.desserts.map((dn) => recommend.indexed[dn]);
+                },
+                (error) => console.error(error));
+    };
+
+    recommend.random = function(course, count=10) {
+        let list = [];
+        for (let i = 0; i < count ; i++) {
+            list.push(recommend.recipes[Math.floor(Math.random()*recommend.recipes.length)]);
+        }
+        recommend.suggestions[course] = list;
     };
 
     recommend.load = function () {
@@ -43,6 +84,11 @@ app.factory("recommend", ["$http", function ($http) {
     recommend.init = function(recipes) {
 
         recommend.recipes = recipes;
+
+        // Give just a random recommendation
+        recommend.random("starter");
+        recommend.random("main");
+        recommend.random("dessert");
 
         recommend.recipes.forEach((recipe, index) => {
             let name = recipe.label;
@@ -117,13 +163,6 @@ app.controller('FrontController', ["$scope", "recommend", function FrontControll
         if (!recommend.selected.find((r) => r.label === recipe.label)) {
             recommend.selected.push(recipe);
         }
-
-    };
-
-    $scope.removeRecipe = (recipe) => {
-        "use strict";
-        let index = recommend.selected.findIndex((r) => r.label === recipe.label);
-        recommend.selected.splice(index, 1);
     };
 
 
@@ -139,13 +178,10 @@ app.controller('FrontController', ["$scope", "recommend", function FrontControll
         }
     };
 
-    $scope.openMenu = ($mdMenu, ev) => {
+    $scope.getSuggestions = () => {
         "use strict";
-        $mdMenu.open(ev);
-    };
+        recommend.suggest();
+    }
 
-    $scope.setLiked = (recipe, liked) => {
-        recipe.liked = liked;
-    };
 
 }]);

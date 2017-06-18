@@ -3,27 +3,36 @@ import numpy as np
 from scipy.spatial.distance import euclidean as distance_
 from scipy.stats import pearsonr
 from sklearn.neighbors import NearestNeighbors
+from collections import OrderedDict
 
 dimensions_ingredients = 702
 dimensions_nutrition_facts = 22
 number_of_clusters=100
+number_of_dishes =5326
 
-filename = "recipes.json"
-with open(filename) as json_data:
-    recipes = json.load(json_data)
-    names = list(recipes.keys())
-    X = np.zeros([len(names), dimensions_ingredients+dimensions_nutrition_facts])
-    labels = {}
-    index = 0
-    for label, recipe in recipes.items():
-        for ingredient in recipe["ingredients"]:
-            X[index, ingredient[0]] = ingredient[1]
-        for fact in recipe["nutrition"]:
-            X[ index, dimensions_ingredients + fact[0] ] = fact[1]
-
-        labels[index] = recipe["healthLabels"]
-        index+=1
-print("File "+filename+" was successfully read")
+filenames = ["firsts.json","seconds.json","desserts.json"]
+X = np.zeros([number_of_dishes, dimensions_ingredients+dimensions_nutrition_facts])
+index = 0
+labels = {}
+names = []
+clusters = {
+    "starters": [],
+    "mains": [],
+    "desserts": []
+}
+for clustName,filename in zip(["starters","mains","desserts"],filenames):
+    with open(filename) as json_data:
+        recipes = json.load(json_data)
+        names +=list(recipes.keys())
+        for label, recipe in recipes.items():
+            for ingredient in recipe["ingredients"]:
+                X[index, ingredient[0]] = ingredient[1]
+            for fact in recipe["nutrition"]:
+                X[ index, dimensions_ingredients + fact[0] ] = fact[1]
+            clusters[clustName].append(index)
+            labels[index] = recipe["healthLabels"]
+            index+=1
+    print("File "+filename+" was successfully read")
 #names = [label for label, recipe in recipes.items()]
 
 def getPearson(a,b,**kwargs):
@@ -31,11 +40,7 @@ def getPearson(a,b,**kwargs):
     return pearsonr(a,b)[0]-1
 class IdssFood:
     # Carlos: Define the clusters, just a list
-    CLUSTERS = {
-        "starters": [],
-        "mains": [],
-        "desserts": []
-    }
+    CLUSTERS = clusters
     NAMES = names
     RECIPES = recipes
     LABELS = labels
@@ -53,7 +58,7 @@ class IdssFood:
         self.ingredients = None  # OR
         self.no_ingredients = []  # AND
 
-        self.nbrs = NearestNeighbors(n_neighbors=20, algorithm='ball_tree',metric=getPearson).fit(self.X_[:,:dimensions_ingredients])
+        self.nbrs = NearestNeighbors(n_neighbors=40, algorithm='ball_tree',metric=getPearson).fit(self.X_[:,:dimensions_ingredients])
 
     def set_liked(self, liked=[], disliked=[]):
         self.liked = self.label2index(liked)
@@ -79,8 +84,13 @@ class IdssFood:
             dist=(dist+std)**2
             candidates.extend(ind[0][1:])
             distances.extend(dist)
-        distind= np.argsort(distances)[-10:]
-        candidates = np.array(candidates)[distind]
+        for ind,candidate in enumerate(candidates):
+            if not candidate in IdssFood.CLUSTERS[cluster]:
+                del distances[ind]
+                del candidates[ind]
+        distind= np.argsort(distances)
+        list(OrderedDict.fromkeys(distind))
+        candidates = np.array(candidates)[distind[:10]]
         candidates = list(set(candidates))
         return candidates
 
@@ -177,9 +187,9 @@ TEST = IdssFood()
 TEST.set_labels(labels=['Gluten-Free'], no_labels=[])
 TEST.set_ingredients(ingredients=[], no_ingredients=[])
 TEST.set_liked(
-    liked=['Red Rice Salad with Boiled Eggs and Macadamias','Crawfish Boil Recipe','Boiled Lobster'], 
-    disliked=['Persimmon Tart','Cumin Lime Black Bean Quinoa Salad'])
-x=TEST.get_closest_to_liked()
+    liked=['Rice Pilaf with Pine Nuts','Salt Cod with Garlic Cream','Roasted Beet Chips'],
+    disliked=['Persimmon Tart', 'Roasted Beet Chips'])
+x=TEST.get_closest_to_liked("starters")
 x=TEST.filter(x)
 print(x)
 x=TEST.rank(x)

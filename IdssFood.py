@@ -84,15 +84,17 @@ class IdssFood:
             dist=(dist+std)**2
             candidates.extend(ind[0][1:])
             distances.extend(dist)
+        todel = []
         for ind,candidate in enumerate(candidates):
             if not candidate in IdssFood.CLUSTERS[cluster]:
-                del distances[ind]
-                del candidates[ind]
+                todel+=[ind]
+        for ind in sorted(todel,reverse=True):
+            del distances[ind]
+            del candidates[ind]
         distind= np.argsort(distances)
         list(OrderedDict.fromkeys(distind))
         candidates = np.array(candidates)[distind[:10]]
-        candidates = list(set(candidates))
-        return candidates
+        return list(candidates)
 
     def filter(self, closest):
         # Nariman: Use labels, no_labels and ingredients and no_ingredients to filter out

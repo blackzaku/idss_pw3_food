@@ -10,6 +10,7 @@ from urllib.parse import parse_qs
 import sys
 sys.path.append("../")
 import IdssFood
+idss = IdssFood.IdssFood()
 
 class IDSSHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -47,12 +48,11 @@ class IDSSHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/suggest':
             parameters = self.parse_POST()
-            idss = IdssFood.IdssFood()
 
             print(parameters)
 
             if 'likes' in parameters and 'dislikes' in parameters:
-                idss.set_liked(parameters['liked'], parameters['disliked'])
+                idss.set_liked(parameters['likes'], parameters['dislikes'])
             if 'ingredients' in parameters and 'no_ingredients' in parameters:
                 idss.set_ingredients(parameters["ingredients"], parameters["no_ingredients"])
             if 'labels' in parameters and 'no_labels' in parameters:

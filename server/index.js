@@ -31,7 +31,7 @@ app.factory("recommend", ["$http", function ($http) {
             labels: [], no_labels: []
         };
 
-        for (let recipe in recommend.selected) {
+        for (let recipe of recommend.selected) {
             if (recipe.liked === true) data.likes.push(recipe.label);
             if (recipe.liked === false) data.dislikes.push(recipe.label);
         }
@@ -44,8 +44,8 @@ app.factory("recommend", ["$http", function ($http) {
             if (label.include === "-") data.no_labels.push(label.name);
         }
 
-        if (data.labels.length === 0) data.labels = null;
-        if (data.ingredients.length === 0) data.ingredients = null;
+        if (data.labels.length === 0) data.labels = [];
+        if (data.ingredients.length === 0) data.ingredients = [];
 
 
         $http({
@@ -67,7 +67,14 @@ app.factory("recommend", ["$http", function ($http) {
     recommend.random = function (course, count = 10) {
         let list = [];
         for (let i = 0; i < count; i++) {
-            list.push(recommend.recipes[Math.floor(Math.random() * recommend.recipes.length)]);
+            let recipe;
+            let c = 0;
+            //TOOD: Fix this mess
+            do{
+              recipe = recommend.recipes[Math.floor(Math.random() * recommend.recipes.length)];
+              c++;
+            }while(recipe.cluster != course && c<150)
+            list.push(recipe);
         }
         recommend.suggestions[course] = list;
     };

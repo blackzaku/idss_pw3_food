@@ -3,10 +3,27 @@
 import json
 import os
 
-
+def prepare_clusters(base_dir="../"):
+    clusters = {
+        "starter": [],
+        "main": [],
+        "dessert": []
+    }
+    filenames = ["../firsts.json","../seconds.json","../desserts.json"]
+    for clustName,filename in zip(["starter","main","dessert"],filenames):
+        with open(filename) as json_data:
+            recipes = json.load(json_data)
+            clusters[clustName].extend(list(recipes.keys()))
+    return clusters
+def getCluster(clusters, label):
+    for cluster in ["starter","main","dessert"]:
+        if label in clusters[cluster]:
+            return cluster
+    return "None"
 def build_recipes_json(base_dir="../food"):
     all_recipes = []
     facts = set()
+    clusters = prepare_clusters()
     # Read files
     for filename in os.listdir(base_dir):
         # print("Reading file "+filename)
@@ -23,6 +40,7 @@ def build_recipes_json(base_dir="../food"):
                     "dietLabels": recipe["dietLabels"],
                     "healthLabels": recipe["healthLabels"],
                     "ingredientLines": recipe["ingredientLines"],
+                    "cluster": getCluster(clusters,recipe["label"])
                 }
                 facts = facts.union(recipe["dietLabels"]+recipe["healthLabels"])
                 all_recipes.append(simple)

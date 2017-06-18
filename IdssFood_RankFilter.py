@@ -1,7 +1,8 @@
 import json
 import numpy as np
 from scipy.spatial.distance import euclidean as distance_
-
+from scipy.stats import pearsonr
+from sklearn.neighbors import NearestNeighbors
 
 dimensions_ingredients = 702
 dimensions_nutrition_facts = 22
@@ -25,7 +26,9 @@ with open(filename) as json_data:
 print("File "+filename+" was successfully read")
 #names = [label for label, recipe in recipes.items()]
 
-
+def getPearson(a,b,**kwargs):
+    #Remove one to make the maximum on 0 for the knn to work
+    return pearsonr(a,b)[0]-1
 class IdssFood:
     # Carlos: Define the clusters, just a list
     CLUSTERS = {
@@ -37,6 +40,7 @@ class IdssFood:
     RECIPES = recipes
     LABELS = labels
     X_ = X
+    SALIENCY = 0.5
 
 
     def __init__(self):
@@ -49,9 +53,11 @@ class IdssFood:
         self.ingredients = None  # OR
         self.no_ingredients = []  # AND
 
+        self.nbrs = NearestNeighbors(n_neighbors=20, algorithm='ball_tree',metric=getPearson).fit(self.X_[:,:dimensions_ingredients])
+
     def set_liked(self, liked=[], disliked=[]):
-        self.liked = self.label2index(self,liked)
-        self.disliked = self.label2index(self,disliked)
+        self.liked = self.label2index(liked)
+        self.disliked = self.label2index(disliked)
 
     def set_labels(self, labels=None, no_labels=()):
         self.labels = labels
@@ -63,8 +69,20 @@ class IdssFood:
 
     def get_closest_to_liked(self, cluster=None):
         # Marti: Use k-nearest neighbours having into account the valid clusters
-        closest =list(range(20))
-        return closest
+        candidates = []
+        distances = []
+        for item in self.liked:
+            dist,ind = self.nbrs.kneighbors(self.X_[item,:dimensions_ingredients].reshape(1, -1))
+            #The first item is itself
+            dist = dist[0][1:]
+            std = self.SALIENCY*np.std(dist)
+            dist=(dist+std)**2
+            candidates.extend(ind[0][1:])
+            distances.extend(dist)
+        distind= np.argsort(distances)[-10:]
+        candidates = np.array(candidates)[distind]
+        candidates = list(set(candidates))
+        return candidates
 
     def filter(self, closest):
         # Nariman: Use labels, no_labels and ingredients and no_ingredients to filter out
@@ -76,7 +94,7 @@ class IdssFood:
                     remove_list += [index]
             for label in  self.labels:
                 if label not in self.LABELS[index]:
-                    remove_list += [index] 
+                    remove_list += [index]
             #ingredients filtering            ###this is based on having X but it can easily changed to get from json file directly if needed.
             for ingredient in  self.no_ingredients:
                 if self.X_[index,ingredient]:
@@ -96,8 +114,8 @@ class IdssFood:
         #first approach: utility function => mean-std
         L = len(closest)
         X_ingredients = self.X_[:,0:dimensions_ingredients]
-      
-        if utility==1:  
+
+        if utility==1:
             dist_list = []
             for i in range(L):
                 temp = []
@@ -120,7 +138,7 @@ class IdssFood:
             temp = []
             for dish in self.disliked:
                 temp.append( distance_(X_ingredients[int(dish),:],X_ingredients[int(closest[i]),:]) )
-            dist_list.append([temp,i])                
+            dist_list.append([temp,i])
         L = len(closest)
         OWAweights = []
         if L != 1:
@@ -136,9 +154,9 @@ class IdssFood:
         closest_temp_ = []
         for i in range(L):
             closest_temp_.append(closest[int(rank_list_[i][1])])
-        closest = closest_temp_                   
+        closest = closest_temp_
         return closest
-        
+
 
     def index2label(self, list):
         return [IdssFood.NAMES[index] for index in list]
@@ -155,14 +173,15 @@ class IdssFood:
             recommendations[cluster] = self.index2label(recipes)
         return recommendations
 
-
-TEST = IdssFood
-TEST.set_labels(TEST, labels=['Gluten-Free'], no_labels=[])
-TEST.set_ingredients(TEST, ingredients=[], no_ingredients=[])
-TEST.set_liked(TEST, disliked=['Persimmon Tart','Cumin Lime Black Bean Quinoa Salad'])
-x=TEST.get_closest_to_liked(TEST)
-x=TEST.filter(TEST,x)
+TEST = IdssFood()
+TEST.set_labels(labels=['Gluten-Free'], no_labels=[])
+TEST.set_ingredients(ingredients=[], no_ingredients=[])
+TEST.set_liked(
+    liked=['Red Rice Salad with Boiled Eggs and Macadamias','Crawfish Boil Recipe','Boiled Lobster'], 
+    disliked=['Persimmon Tart','Cumin Lime Black Bean Quinoa Salad'])
+x=TEST.get_closest_to_liked()
+x=TEST.filter(x)
 print(x)
-x=TEST.rank(TEST,x)
-y=TEST.index2label(TEST, x)
+x=TEST.rank(x)
+y=TEST.index2label( x)
 print(x,'\n',y)

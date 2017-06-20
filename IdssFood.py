@@ -128,7 +128,11 @@ class IdssFood:
             for ingredient in  self.ingredients:
                 if self.X_[index,ingredient] == 0.0:
                     remove_list += [index]
-        filtered = []
+
+        filtered=[]
+        for item in self.disliked + self.liked:
+            if item in closest:
+                closest.remove(item)
         for item in closest:
             if item not in remove_list:
                 filtered.append(item)

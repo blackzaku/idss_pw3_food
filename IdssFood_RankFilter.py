@@ -116,7 +116,7 @@ class IdssFood:
                     remove_list += [index]
         for item in set(remove_list):
             closest.remove(item)
-        for item in self.disliked:
+        for item in self.disliked+self.liked:
             if item in closest:
                 closest.remove(item)
         return closest
@@ -189,7 +189,7 @@ TEST = IdssFood()
 TEST.set_labels(labels=['Gluten-Free'], no_labels=[])
 TEST.set_ingredients(ingredients=[], no_ingredients=[])
 TEST.set_liked(
-    liked=['Rice Pilaf with Pine Nuts','Salt Cod with Garlic Cream','Roasted Beet Chips'],
+    liked=['Rice Pilaf with Pine Nuts','Salt Cod with Garlic Cream','Roasted Beet Chips','Easy Black Beans And Rice'],
     disliked=['Persimmon Tart', 'Roasted Beet Chips'])
 x=TEST.get_closest_to_liked("starters")
 x=TEST.filter(x)

@@ -106,9 +106,9 @@ class IdssFood:
             del distances[ind]
             del candidates[ind]
         distind= np.argsort(distances)
-        distind=list(OrderedDict.fromkeys(distind))
         candidates = np.array(candidates)[distind[:10]]
-        return list(candidates)
+        candidates=list(OrderedDict.fromkeys(list(candidates)))
+        return candidates
 
     def filter(self, closest):
         # Nariman: Use labels, no_labels and ingredients and no_ingredients to filter out

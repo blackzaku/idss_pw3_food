@@ -123,17 +123,16 @@ class IdssFood:
                     remove_list += [index]
             #ingredients filtering            ###this is based on having X but it can easily changed to get from json file directly if needed.
             for ingredient in  self.no_ingredients:
-                if self.X_[index,ingredient]:
+                if self.X_[index, ingredient] > 0.0:
                     remove_list += [index]
             for ingredient in  self.ingredients:
-                if self.X_[index,ingredient]==0:
+                if self.X_[index,ingredient] == 0.0:
                     remove_list += [index]
-        for item in set(remove_list):
-            closest.remove(item)
-        for item in self.disliked:
-            if item in closest:
-                closest.remove(item)
-        return closest
+        filtered = []
+        for item in closest:
+            if item not in remove_list:
+                filtered.append(item)
+        return filtered
 
     def rank(self, closest,utility = 0): # utility=0:OWA, utility=1:meanstd
         # Nariman: Use disliked dishes to rank

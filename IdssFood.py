@@ -92,7 +92,7 @@ class IdssFood:
             del distances[ind]
             del candidates[ind]
         distind= np.argsort(distances)
-        list(OrderedDict.fromkeys(distind))
+        distind=list(OrderedDict.fromkeys(distind))
         candidates = np.array(candidates)[distind[:10]]
         return list(candidates)
 
@@ -116,7 +116,7 @@ class IdssFood:
                     remove_list += [index]
         for item in set(remove_list):
             closest.remove(item)
-        for item in self.disliked:
+        for item in self.disliked+self.liked:
             if item in closest:
                 closest.remove(item)
         return closest

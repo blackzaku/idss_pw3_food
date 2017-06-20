@@ -35,15 +35,25 @@ for clustName,filename in zip(["starters","mains","desserts"],filenames):
     print("File "+filename+" was successfully read")
 #names = [label for label, recipe in recipes.items()]
 
+all_ingredients = {}
+index = 0
+with open('../ingredients.txt') as ingredients:
+    for line in ingredients:
+        line = line.strip()
+        ingredient = line.split()
+        all_ingredients[" ".join(ingredient[1:])] = index
+        index += 1
+
 def getPearson(a,b,**kwargs):
     #Remove one to make the maximum on 0 for the knn to work
-    return pearsonr(a,b)[0]-1
+    return pearsonr(a, b)[0]-1
 class IdssFood:
     # Carlos: Define the clusters, just a list
     CLUSTERS = clusters
     NAMES = names
     RECIPES = recipes
     LABELS = labels
+    INGREDIENTS = all_ingredients
     X_ = X
     SALIENCY = 0.5
 
@@ -68,16 +78,20 @@ class IdssFood:
         self.labels = labels
         self.no_labels = no_labels
 
+    def ingredient2index(self, list):
+        return [IdssFood.INGREDIENTS[label] for label in list]
+
     def set_ingredients(self, ingredients=None, no_ingredients=()):
-        self.ingredients = ingredients
-        self.no_ingredients = no_ingredients
+        self.ingredients = self.ingredient2index(ingredients)
+        self.no_ingredients = self.ingredient2index(no_ingredients)
+        print(self.no_ingredients)
 
     def get_closest_to_liked(self, cluster=None):
         # Marti: Use k-nearest neighbours having into account the valid clusters
         candidates = []
         distances = []
         for item in self.liked:
-            dist,ind = self.nbrs.kneighbors(self.X_[item,:dimensions_ingredients].reshape(1, -1))
+            dist, ind = self.nbrs.kneighbors(self.X_[item,:dimensions_ingredients].reshape(1, -1))
             #The first item is itself
             dist = dist[0][1:]
             std = self.SALIENCY*np.std(dist)
